@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityTransit - Бюджет та Оцінка (Лаб 4)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Підключення Chart.js для інтерактивних графіків -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* BASE STYLES */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #05080f;
+            color: #D1D5DB;
+            font-family: 'Urbanist', sans-serif;
+            line-height: 1.6;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        /* TYPOGRAPHY */
+        h1, h2, h3, h4 { color: #F9FAFB; font-weight: 700; margin-bottom: 15px; }
+        h1 { font-size: 48px; text-align: center; color: #00E5FF; }
+        h2 { font-size: 32px; border-bottom: 2px solid rgba(0, 229, 255, 0.2); padding-bottom: 10px; color: #F9FAFB; }
+        h2 span { color: #00E5FF; }
+        h3 { font-size: 22px; color: #3B82F6; }
+        p { font-size: 16px; margin-bottom: 10px; }
+        strong { color: #F9FAFB; }
+
+        /* ANIMATIONS ON SCROLL */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .animate-on-scroll.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* SECTIONS & CARDS */
+        .section-card {
+            background-color: #0B0F19;
+            border: 1px solid #1F2937;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: visible; /* Changed for tooltips */
+        }
+        .section-card::before {
+            background: radial-gradient(circle at top right, rgba(0, 229, 255, 0.05) 0%, transparent 50%);
+            content: ''; height: 100%; left: 0; position: absolute; top: 0; width: 100%; pointer-events: none; z-index: 0;
+        }
+        .section-card > * { position: relative; z-index: 1; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        
+        /* HOVER EFFECTS FOR CARDS */
+        .info-box, .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+        .info-box:hover, .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .info-box {
+            background-color: #111827;
+            border-left: 4px solid #00E5FF;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background-color: #111827;
+            border: 1px solid #1F2937;
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            border-color: #374151;
+        }
+
+        /* LISTS */
+        .bullet-list { list-style: none; padding-left: 10px; }
+        .bullet-list li { margin-bottom: 10px; position: relative; padding-left: 25px; }
+        .bullet-list li i { color: #00E5FF; position: absolute; left: 0; top: 5px; font-size: 14px; }
+        
+        /* TABLES WITH HOVER */
+        .table-wrapper { width: 100%; background-color: #111827; border-radius: 12px; border: 1px solid #1F2937; overflow: hidden; margin-top: 15px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { padding: 14px 20px; text-align: left; font-size: 15px; transition: background-color 0.2s ease; }
+        th { background-color: #1F2937; color: #00E5FF; font-weight: 700; border-bottom: 2px solid #374151; }
+        td { border-bottom: 1px solid #1F2937; }
+        tr:nth-child(even) { background-color: rgba(31, 41, 55, 0.4); }
+        tr:hover td { background-color: rgba(0, 229, 255, 0.05); } /* Table row hover */
+        .money-cell { font-family: monospace; font-size: 16px; font-weight: 700; color: #10B981; text-align: right; }
+        .center-cell { text-align: center; }
+
+        /* HIGHLIGHT BOXES */
+        .highlight-box { text-align: center; padding: 30px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(0, 229, 255, 0.1)); border-radius: 16px; border: 1px solid rgba(16, 185, 129, 0.3); margin-top: 20px; transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .highlight-box:hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(16, 185, 129, 0.2); }
+        .highlight-num { font-size: 56px; font-weight: 700; color: #10B981; line-height: 1; margin-bottom: 10px; text-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+
+        /* INTERACTIVE TIMELINE (MILESTONES) */
+        .timeline-wrapper { overflow-x: auto; padding-bottom: 40px; margin-top: 30px; padding-top: 20px;}
+        .timeline { display: flex; justify-content: space-between; align-items: center; position: relative; min-width: 800px; padding: 0 20px;}
+        .timeline::before { content: ''; position: absolute; top: 20px; left: 40px; right: 40px; height: 4px; background: #1F2937; z-index: 1; }
+        
+        .milestone { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 140px; text-align: center; cursor: pointer; transition: transform 0.3s ease;}
+        .milestone:hover { transform: translateY(-5px); }
+        
+        .milestone-dot { width: 44px; height: 44px; background: #111827; border: 4px solid #3B82F6; border-radius: 50%; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; color: #F9FAFB; font-weight: 700; font-size: 14px; box-shadow: 0 0 10px rgba(0,0,0,0.5); transition: all 0.3s ease;}
+        .milestone:nth-child(even) .milestone-dot { border-color: #00E5FF; }
+        .milestone:hover .milestone-dot { box-shadow: 0 0 20px rgba(0, 229, 255, 0.8); background: rgba(0, 229, 255, 0.1); }
+        
+        .milestone-title { font-weight: 700; color: #F9FAFB; font-size: 14px; margin-bottom: 5px; }
+        .milestone-amount { color: #10B981; font-family: monospace; font-size: 15px; font-weight: 600; }
+
+        /* TOOLTIPS FOR MILESTONES */
+        .milestone .tooltip {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            background-color: #1F2937;
+            color: #D1D5DB;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            width: 220px;
+            font-size: 13px;
+            font-weight: normal;
+            border: 1px solid #374151;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 100;
+            margin-bottom: 15px;
+        }
+        .milestone .tooltip::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -8px;
+            border-width: 8px;
+            border-style: solid;
+            border-color: #1F2937 transparent transparent transparent;
+        }
+        .milestone:hover .tooltip {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* CHART CONTAINER */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- HEADER -->
+    <div style="text-align: center; padding: 20px 0;" class="animate-on-scroll">
+        <h1>Проєкт CityTransit</h1>
+        <p style="font-size: 24px; color: #9CA3AF;">Проєктна документація: Оцінка вартості та бюджетування</p>
+        <p>Лабораторна робота №4 | Виконав: Project Manager Кара Микита (АІ-221)</p>
+    </div>
+
+    <!-- 1. ENGAGEMENT & PRICING MODELS -->
+    <div class="section-card animate-on-scroll">
+        <h2>1. Моделі Взаємодії та <span>Ціноутворення</span></h2>
+        <div class="grid-2">
+            <div class="info-box" style="border-left-color: #3B82F6;">
+                <h3 style="color: #3B82F6;"><i class="fa-solid fa-handshake"></i> Managed Delivery</h3>
+                <p style="margin-bottom: 15px;"><strong>Обґрунтування:</strong> Оптимально для стартапу з чітким MVP на 6 місяців. Команда бере на себе відповідальність за весь цикл розробки.</p>
+                <ul class="bullet-list">
+                    <li><i class="fa-solid fa-arrow-right" style="color: #3B82F6;"></i> <strong>Відповідальність:</strong> Висока (повністю на боці виконавця/PM).</li>
+                    <li><i class="fa-solid fa-arrow-right" style="color: #3B82F6;"></i> <strong>Контроль клієнта:</strong> Низький у мікроменеджменті, високий на рівні приймання етапів.</li>
+                    <li><i class="fa-solid fa-arrow-right" style="color: #3B82F6;"></i> <strong>Ризики:</strong> Scope Creep (розростання вимог) для виконавця.</li>
+                </ul>
+            </div>
+            <div class="info-box" style="border-left-color: #00E5FF;">
+                <h3 style="color: #00E5FF;"><i class="fa-solid fa-file-invoice-dollar"></i> Fixed Price</h3>
+                <p style="margin-bottom: 15px;"><strong>Обґрунтування:</strong> Інвестор (Місто) потребує чіткого розуміння фінальної вартості розробки платформи до старту проєкту.</p>
+                <ul class="bullet-list">
+                    <li><i class="fa-solid fa-arrow-right"></i> <strong>Формування:</strong> Bottom-Up (Прямі + Непрямі витрати + Резерв).</li>
+                    <li><i class="fa-solid fa-arrow-right"></i> <strong>Ризик клієнта:</strong> Складність внесення змін до ТЗ після підписання.</li>
+                    <li><i class="fa-solid fa-arrow-right"></i> <strong>Ризик виконавця:</strong> Технічні затримки покриваються за власний рахунок.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. DIRECT COSTS -->
+    <div class="section-card animate-on-scroll">
+        <h2>2. Прямі Витрати <span>(Direct Costs)</span></h2>
+        <p>Розрахунок заробітної плати (Salary Cost) крос-функціональної команди з 11 фахівців на період розробки MVP (6 місяців).</p>
+        
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Роль (Name of resource)</th>
+                        <th class="center-cell">К-сть</th>
+                        <th class="center-cell">Період (міс)</th>
+                        <th class="center-cell">Ставка ($/міс)</th>
+                        <th style="text-align: right;">Загальна вартість</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Project Manager / Product Owner</td><td class="center-cell">1</td><td class="center-cell">6</td><td class="center-cell">2 000 $</td><td class="money-cell">12 000 $</td></tr>
+                    <tr><td>Technical Lead</td><td class="center-cell">1</td><td class="center-cell">6</td><td class="center-cell">3 000 $</td><td class="money-cell">18 000 $</td></tr>
+                    <tr><td>Business Analyst</td><td class="center-cell">1</td><td class="center-cell">4</td><td class="center-cell">1 500 $</td><td class="money-cell">6 000 $</td></tr>
+                    <tr><td>Backend Developer</td><td class="center-cell">2</td><td class="center-cell">6</td><td class="center-cell">2 000 $</td><td class="money-cell">24 000 $</td></tr>
+                    <tr><td>Mobile Developer</td><td class="center-cell">2</td><td class="center-cell">6</td><td class="center-cell">2 000 $</td><td class="money-cell">24 000 $</td></tr>
+                    <tr><td>Data Engineer</td><td class="center-cell">1</td><td class="center-cell">5</td><td class="center-cell">2 500 $</td><td class="money-cell">12 500 $</td></tr>
+                    <tr><td>QA Engineer</td><td class="center-cell">1</td><td class="center-cell">6</td><td class="center-cell">1 200 $</td><td class="money-cell">7 200 $</td></tr>
+                    <tr><td>DevOps / UX/UI Designers</td><td class="center-cell">2</td><td class="center-cell">3</td><td class="center-cell">~1 750 $</td><td class="money-cell">10 500 $</td></tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="text-align: right; margin-top: 15px;">
+            <h3 style="color: #00E5FF; font-size: 24px;">SUM (Direct Costs): <span style="font-family: monospace; color: #F9FAFB;">$114,200</span></h3>
+        </div>
+    </div>
+
+    <!-- 3. INDIRECT COSTS -->
+    <div class="section-card animate-on-scroll">
+        <h2>3. Непрямі Витрати <span>(Indirect Costs)</span></h2>
+        
+        <div class="grid-2" style="align-items: start;">
+            <div>
+                <p style="margin-bottom: 15px;"><strong>Чому ці витрати є непрямими?</strong></p>
+                <p style="color: #9CA3AF;">Вони не пов'язані безпосередньо з написанням коду конкретного функціоналу додатку CityTransit. Це супутні, операційні та адміністративні витрати, необхідні для забезпечення життєдіяльності команди, функціонування офісу та підтримки інфраструктури протягом 6 місяців проєкту.</p>
+            </div>
+            
+            <div class="table-wrapper" style="margin-top: 0;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Стаття витрат (Resource)</th>
+                            <th style="text-align: right;">Вартість (за 6 міс)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Office rent (Оренда офісу)</td><td class="money-cell">6 000 $</td></tr>
+                        <tr><td>Marketing & Promo (Реклама)</td><td class="money-cell">5 000 $</td></tr>
+                        <tr><td>Cloud Infrastructure (AWS/GCP)</td><td class="money-cell">3 000 $</td></tr>
+                        <tr><td>Hardware depreciation (Амортизація)</td><td class="money-cell">2 000 $</td></tr>
+                        <tr><td>Finance / Accounting / Legal</td><td class="money-cell">1 800 $</td></tr>
+                        <tr><td>Software Licenses (Jira, Figma)</td><td class="money-cell">1 500 $</td></tr>
+                        <tr><td>HR & Recruiting support</td><td class="money-cell">1 500 $</td></tr>
+                        <tr><td>Electricity and utilities</td><td class="money-cell">1 200 $</td></tr>
+                        <tr><td>Administrative (кава, канцелярія)</td><td class="money-cell">900 $</td></tr>
+                        <tr><td>Internet and network services</td><td class="money-cell">600 $</td></tr>
+                        <tr style="background: rgba(16, 185, 129, 0.1);"><td style="font-weight: 700;">SUM (Indirect Costs)</td><td class="money-cell">23 500 $</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TOTAL COST WITH INTERACTIVE CHART -->
+    <div class="section-card animate-on-scroll">
+        <h2>4. Загальна вартість <span>(Final Project Cost)</span></h2>
+        
+        <div class="grid-2" style="margin-top: 30px; align-items: center;">
+            <div>
+                <div class="grid-2" style="gap: 15px;">
+                    <div class="card" style="text-align: center; padding: 15px;">
+                        <p style="color: #9CA3AF; margin-bottom: 5px; font-size: 14px;">Прямі витрати</p>
+                        <h3 style="font-size: 24px; margin: 0; color: #3B82F6;">$114,200</h3>
+                    </div>
+                    <div class="card" style="text-align: center; padding: 15px;">
+                        <p style="color: #9CA3AF; margin-bottom: 5px; font-size: 14px;">Непрямі витрати</p>
+                        <h3 style="font-size: 24px; margin: 0; color: #00E5FF;">$23,500</h3>
+                    </div>
+                </div>
+                <div class="card" style="text-align: center; padding: 15px; margin-top: 15px;">
+                    <p style="color: #9CA3AF; margin-bottom: 5px; font-size: 14px;">Contingency Reserve (10%)</p>
+                    <h3 style="font-size: 24px; margin: 0; color: #8B5CF6;">$13,770</h3>
+                </div>
+                
+                <div class="highlight-box">
+                    <p style="font-size: 20px; color: #9CA3AF; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px;">Фінальний Кошторис</p>
+                    <div class="highlight-num">$151,470</div>
+                    <p style="font-size: 20px; color: #F9FAFB;">~ 6 058 800 грн</p>
+                </div>
+            </div>
+            
+            <!-- Interacitve Chart Canvas -->
+            <div class="chart-container">
+                <canvas id="budgetChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. COST MANAGEMENT PLAN -->
+    <div class="section-card animate-on-scroll">
+        <h2>5. Управління Витратами <span>(Fixed Price Milestones)</span></h2>
+        <p><strong>Логіка фінансування:</strong> Клієнт виплачує аванс для старту. Подальші транші здійснюються лише після успішної демонстрації та затвердження попереднього етапу (Milestone). <em>Наведіть курсор на етапи для деталей.</em></p>
+        
+        <div class="timeline-wrapper">
+            <div class="timeline">
+                <div class="milestone">
+                    <div class="tooltip">Підписання договору, формування команди, налаштування середовища розробки.</div>
+                    <div class="milestone-dot">20%</div>
+                    <div class="milestone-title">Start of Project</div>
+                    <div class="milestone-amount">30 294 $</div>
+                </div>
+                <div class="milestone">
+                    <div class="tooltip">Затвердження макетів UI/UX, проектування архітектури БД та структури API.</div>
+                    <div class="milestone-dot">15%</div>
+                    <div class="milestone-title">Design & DB</div>
+                    <div class="milestone-amount">22 720 $</div>
+                </div>
+                <div class="milestone">
+                    <div class="tooltip">Завершення розробки серверного ядра, алгоритмів прогнозування (ETA) та інтеграцій.</div>
+                    <div class="milestone-dot">25%</div>
+                    <div class="milestone-title">Backend & ETA</div>
+                    <div class="milestone-amount">37 867 $</div>
+                </div>
+                <div class="milestone">
+                    <div class="tooltip">Демонстрація працюючого мобільного додатку з безготівковою оплатою. Успішне проходження QA.</div>
+                    <div class="milestone-dot">25%</div>
+                    <div class="milestone-title">Mobile MVP & QA</div>
+                    <div class="milestone-amount">37 867 $</div>
+                </div>
+                <div class="milestone">
+                    <div class="tooltip">Офіційна публікація в App Store та Google Play, передача вихідного коду клієнту.</div>
+                    <div class="milestone-dot">15%</div>
+                    <div class="milestone-title">Final Release</div>
+                    <div class="milestone-amount">22 722 $</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box" style="border-left-color: #EF4444; background: rgba(239, 68, 68, 0.05); margin-top: 10px; margin-bottom: 0;">
+            <h3 style="color: #EF4444; font-size: 18px;"><i class="fa-solid fa-shield-halved"></i> Контроль бюджету</h3>
+            <p style="font-size: 15px;">PM контролює внутрішній бюджет компанії через Earned Value Management (EVM). У Jira трекаються витрачені години команди і жорстко порівнюються з плановими для недопущення касового розриву.</p>
+        </div>
+    </div>
+
+    <!-- 6. COMPARISON -->
+    <div class="section-card animate-on-scroll">
+        <h2>6. Аналіз Відхилень Бюджету <span>(Lab 1 vs Lab 4)</span></h2>
+        
+        <div class="grid-2">
+            <div>
+                <div class="card" style="background: rgba(239, 68, 68, 0.1); border-color: #EF4444; margin-bottom: 20px;">
+                    <h3 style="color: #EF4444; font-size: 20px;">Лабораторна №1 (Ідея)</h3>
+                    <p style="font-family: monospace; font-size: 28px; font-weight: 700; color: #F9FAFB;">~ 2 000 000 грн</p>
+                    <p style="font-size: 14px; margin-top: 5px; color: #9CA3AF;">Інтуїтивна початкова оцінка без детального WBS.</p>
+                </div>
+                <div class="card" style="background: rgba(16, 185, 129, 0.1); border-color: #10B981;">
+                    <h3 style="color: #10B981; font-size: 20px;">Лабораторна №4 (Детальна)</h3>
+                    <p style="font-family: monospace; font-size: 28px; font-weight: 700; color: #F9FAFB;">~ 6 058 800 грн</p>
+                    <p style="font-size: 14px; margin-top: 5px; color: #9CA3AF;">Сформована на основі реальних ставок 11 FTE + Ризики.</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3><i class="fa-solid fa-chart-line"></i> Управлінські висновки</h3>
+                <ul class="bullet-list" style="margin-top: 15px;">
+                    <li><i class="fa-solid fa-triangle-exclamation" style="color: #F59E0B;"></i> <strong>Відхилення > 200%:</strong> Початковий бюджет був сильно недооцінений через неврахування реальних ринкових IT-зарплат та інфраструктурних витрат.</li>
+                    <li><i class="fa-solid fa-lightbulb" style="color: #F59E0B;"></i> <strong>Рішення А (Пошук фінансів):</strong> Презентувати інвесторам новий, прозорий кошторис. Детальний WBS (Work Breakdown Structure) підвищує довіру.</li>
+                    <li><i class="fa-solid fa-scissors" style="color: #EF4444;"></i> <strong>Рішення Б (Скорочення Scope):</strong> Якщо 2 млн. грн. — це жорсткий ліміт, ми змушені зменшити команду та перенести розробку AI-прогнозування (ETA) на Фазу 2.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Скрипти для Інтерактивності (Анімації скролу та Графік) -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Анімації при скролінгу (Intersection Observer)
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    observer.unobserve(entry.target); // Анімуємо тільки 1 раз
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(section => {
+            observer.observe(section);
+        });
+
+        // 2. Ініціалізація інтерактивного графіка (Chart.js)
+        const ctx = document.getElementById('budgetChart').getContext('2d');
+        
+        Chart.defaults.color = '#9CA3AF';
+        Chart.defaults.font.family = "'Urbanist', sans-serif";
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Прямі витрати (Direct)', 'Непрямі витрати (Indirect)', 'Резерв (Contingency)'],
+                datasets: [{
+                    data: [114200, 23500, 13770],
+                    backgroundColor: [
+                        '#3B82F6', // Blue
+                        '#00E5FF', // Cyan
+                        '#8B5CF6'  // Purple
+                    ],
+                    borderColor: '#0B0F19',
+                    borderWidth: 4,
+                    hoverOffset: 10 // Ефект висування при наведенні
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '65%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#1F2937',
+                        titleFont: { size: 14, family: "'Urbanist', sans-serif" },
+                        bodyFont: { size: 16, weight: 'bold', family: "monospace" },
+                        padding: 15,
+                        borderColor: '#374151',
+                        borderWidth: 1,
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                if (label) { label += ': '; }
+                                if (context.parsed !== null) {
+                                    label += new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(context.parsed);
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
