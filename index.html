@@ -189,6 +189,21 @@
             justify-content: center;
             align-items: center;
         }
+        
+        /* EVM LIST STYLES */
+        .evm-list {
+            margin-top: 10px;
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+        .evm-list li {
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: #D1D5DB;
+        }
+        .evm-list li strong {
+            color: #00E5FF;
+        }
     </style>
 </head>
 <body>
@@ -369,6 +384,20 @@
             <h3 style="color: #EF4444; font-size: 18px;"><i class="fa-solid fa-shield-halved"></i> Контроль бюджету</h3>
             <p style="font-size: 15px;">PM контролює внутрішній бюджет компанії через Earned Value Management (EVM). У Jira трекаються витрачені години команди і жорстко порівнюються з плановими для недопущення касового розриву.</p>
         </div>
+
+        <div class="card" style="margin-top: 20px; border-color: #8B5CF6;">
+            <h3 style="color: #8B5CF6; font-size: 20px;"><i class="fa-solid fa-chart-pie" style="margin-right: 10px;"></i> Що таке EVM і як він працює для CityTransit?</h3>
+            <p style="font-size: 15px; margin-bottom: 10px;"><strong>Earned Value Management (Управління освоєним обсягом)</strong> — це проектна методологія, яка об'єднує вимірювання обсягу робіт, часу (графіка) та витрат для об'єктивної оцінки прогресу проєкту.</p>
+            <p style="font-size: 15px; margin-bottom: 15px;">Оскільки CityTransit працює за моделлю <strong>Fixed Price</strong>, компанія-виконавець несе високі фінансові ризики. EVM ідеально підходить для нашого проєкту, оскільки дозволяє PM-у постійно мати відповідь на головне питання: <em>"Чи не витрачаємо ми бюджет швидше, ніж створюємо реальну цінність?"</em></p>
+            
+            <ul class="evm-list">
+                <li><strong>Planned Value (PV - Плановий обсяг):</strong> Скільки роботи ми планували зробити та скільки це мало коштувати на даний момент часу згідно з розкладом (наприклад, завершити бекенд до 3-го місяця).</li>
+                <li><strong>Actual Cost (AC - Фактичні витрати):</strong> Скільки грошей (годин розробників) ми реально витратили станом на сьогоднішній день.</li>
+                <li><strong>Earned Value (EV - Освоєний обсяг):</strong> Фінансова цінність реально виконаної і прийнятої роботи (наприклад, завершені Story Points).</li>
+            </ul>
+            
+            <p style="font-size: 15px; margin-top: 15px; color: #9CA3AF;"><strong>Приклад контролю ризиків:</strong> Якщо ми витратили 50% бюджету команди (AC), але завершили лише етап "Design & DB", який становить 35% освоєного обсягу (EV), система EVM негайно сигналізує про відставання від графіка (SPI < 1) та перевитрати бюджету (CPI < 1). Це дозволяє PM-у вжити коригувальних дій ще до того, як настане касовий розрив.</p>
+        </div>
     </div>
 
     <div class="section-card animate-on-scroll">
@@ -393,7 +422,7 @@
                 <ul class="bullet-list" style="margin-top: 15px;">
                     <li><i class="fa-solid fa-triangle-exclamation" style="color: #F59E0B;"></i> <strong>Відхилення > 200%:</strong> Початковий бюджет був сильно недооцінений через неврахування реальних ринкових IT-зарплат та інфраструктурних витрат.</li>
                     <li><i class="fa-solid fa-lightbulb" style="color: #F59E0B;"></i> <strong>Рішення А (Пошук фінансів):</strong> Презентувати інвесторам новий, прозорий кошторис. Детальний WBS (Work Breakdown Structure) підвищує довіру.</li>
-                    <li><i class="fa-solid fa-scissors" style="color: #EF4444;"></i> <strong>Рішення Б (Скорочення Scope):</strong> Якщо 2 млн. грн. - це жорсткий ліміт, ми змушені зменшити команду та перенести розробку AI-прогнозування (ETA) на Фазу 2.</li>
+                    <li><i class="fa-solid fa-scissors" style="color: #EF4444;"></i> <strong>Рішення Б (Скорочення Scope):</strong> Якщо 2 млн. грн. — це жорсткий ліміт, ми змушені зменшити команду та перенести розробку AI-прогнозування (ETA) на Фазу 2.</li>
                 </ul>
             </div>
         </div>
