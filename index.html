@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Підключення Chart.js для інтерактивних графіків -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* BASE STYLES */
@@ -59,7 +58,7 @@
             padding: 40px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
             position: relative;
-            overflow: visible; /* Changed for tooltips */
+            overflow: visible; /* Дозволяє підказкам виходити за межі картки */
         }
         .section-card::before {
             background: radial-gradient(circle at top right, rgba(0, 229, 255, 0.05) 0%, transparent 50%);
@@ -120,13 +119,20 @@
         .highlight-box:hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(16, 185, 129, 0.2); }
         .highlight-num { font-size: 56px; font-weight: 700; color: #10B981; line-height: 1; margin-bottom: 10px; text-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
 
-        /* INTERACTIVE TIMELINE (MILESTONES) */
-        .timeline-wrapper { overflow-x: auto; padding-bottom: 40px; margin-top: 30px; padding-top: 20px;}
+        /* INTERACTIVE TIMELINE (MILESTONES) - ВИПРАВЛЕНО Z-INDEX */
+        .timeline-wrapper { 
+            position: relative; 
+            z-index: 10 !important; 
+            overflow: visible; 
+            padding-bottom: 40px; 
+            margin-top: 30px; 
+            padding-top: 20px;
+        }
         .timeline { display: flex; justify-content: space-between; align-items: center; position: relative; min-width: 800px; padding: 0 20px;}
         .timeline::before { content: ''; position: absolute; top: 20px; left: 40px; right: 40px; height: 4px; background: #1F2937; z-index: 1; }
         
         .milestone { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; width: 140px; text-align: center; cursor: pointer; transition: transform 0.3s ease;}
-        .milestone:hover { transform: translateY(-5px); }
+        .milestone:hover { transform: translateY(-5px); z-index: 50; } /* Виправлено z-index при наведенні */
         
         .milestone-dot { width: 44px; height: 44px; background: #111827; border: 4px solid #3B82F6; border-radius: 50%; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; color: #F9FAFB; font-weight: 700; font-size: 14px; box-shadow: 0 0 10px rgba(0,0,0,0.5); transition: all 0.3s ease;}
         .milestone:nth-child(even) .milestone-dot { border-color: #00E5FF; }
@@ -189,14 +195,12 @@
 
 <div class="container">
     
-    <!-- HEADER -->
     <div style="text-align: center; padding: 20px 0;" class="animate-on-scroll">
         <h1>Проєкт CityTransit</h1>
         <p style="font-size: 24px; color: #9CA3AF;">Проєктна документація: Оцінка вартості та бюджетування</p>
         <p>Лабораторна робота №4 | Виконав: Project Manager Кара Микита (АІ-221)</p>
     </div>
 
-    <!-- 1. ENGAGEMENT & PRICING MODELS -->
     <div class="section-card animate-on-scroll">
         <h2>1. Моделі Взаємодії та <span>Ціноутворення</span></h2>
         <div class="grid-2">
@@ -221,7 +225,6 @@
         </div>
     </div>
 
-    <!-- 2. DIRECT COSTS -->
     <div class="section-card animate-on-scroll">
         <h2>2. Прямі Витрати <span>(Direct Costs)</span></h2>
         <p>Розрахунок заробітної плати (Salary Cost) крос-функціональної команди з 11 фахівців на період розробки MVP (6 місяців).</p>
@@ -255,7 +258,6 @@
         </div>
     </div>
 
-    <!-- 3. INDIRECT COSTS -->
     <div class="section-card animate-on-scroll">
         <h2>3. Непрямі Витрати <span>(Indirect Costs)</span></h2>
         
@@ -291,7 +293,6 @@
         </div>
     </div>
 
-    <!-- 4. TOTAL COST WITH INTERACTIVE CHART -->
     <div class="section-card animate-on-scroll">
         <h2>4. Загальна вартість <span>(Final Project Cost)</span></h2>
         
@@ -319,14 +320,12 @@
                 </div>
             </div>
             
-            <!-- Interacitve Chart Canvas -->
             <div class="chart-container">
                 <canvas id="budgetChart"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- 5. COST MANAGEMENT PLAN -->
     <div class="section-card animate-on-scroll">
         <h2>5. Управління Витратами <span>(Fixed Price Milestones)</span></h2>
         <p><strong>Логіка фінансування:</strong> Клієнт виплачує аванс для старту. Подальші транші здійснюються лише після успішної демонстрації та затвердження попереднього етапу (Milestone). <em>Наведіть курсор на етапи для деталей.</em></p>
@@ -372,7 +371,6 @@
         </div>
     </div>
 
-    <!-- 6. COMPARISON -->
     <div class="section-card animate-on-scroll">
         <h2>6. Аналіз Відхилень Бюджету <span>(Lab 1 vs Lab 4)</span></h2>
         
@@ -403,7 +401,6 @@
 
 </div>
 
-<!-- Скрипти для Інтерактивності (Анімації скролу та Графік) -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // 1. Анімації при скролінгу (Intersection Observer)
